@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel da Transparência — Deputados Estaduais de Goiás</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a181c; --ink-2:#0f2127; --paper:#f6fafb; --paper-2:#ffffff;
+    --green:#3ca878; --green-soft:rgba(60,168,120,.12); --amber:#c9892f;
+    --amber-soft:rgba(201,137,47,.12); --red:#c0533f; --red-soft:rgba(192,83,63,.12);
+    --line:rgba(10,24,28,.10); --line-on-ink:rgba(246,250,251,.12);
+    --muted:#5a6b70; --muted-on-ink:rgba(246,250,251,.62);
+    --shadow:0 1px 2px rgba(10,24,28,.06), 0 8px 28px rgba(10,24,28,.08);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:'Archivo',sans-serif;letter-spacing:-.02em}
+  .mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+  a{color:inherit}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  button{font:inherit}
+
+  header.top{background:var(--ink);color:var(--paper)}
+  .top-inner{display:flex;align-items:center;gap:18px;padding:18px 0;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:13px}
+  .seal{width:42px;height:42px;border-radius:10px;background:var(--green);
+    display:grid;place-items:center;flex:none;box-shadow:0 0 0 4px rgba(60,168,120,.18)}
+  .seal svg{width:24px;height:24px}
+  .brand h1{font-size:18px;margin:0;line-height:1.15}
+  .brand .sub{font-size:11.5px;color:var(--muted-on-ink);letter-spacing:.04em;text-transform:uppercase}
+  .status{margin-left:auto;display:flex;align-items:center;gap:9px;font-size:12.5px;
+    color:var(--muted-on-ink);background:var(--ink-2);border:1px solid var(--line-on-ink);
+    padding:8px 13px;border-radius:999px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 4px var(--amber-soft);flex:none}
+  .dot.live{background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .dot.demo{background:var(--amber)}
+  .dot.err{background:var(--red);box-shadow:0 0 0 4px var(--red-soft)}
+  .top-actions{display:flex;gap:8px}
+  .btn{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;
+    background:var(--ink-2);border:1px solid var(--line-on-ink);color:var(--paper);
+    padding:8px 13px;border-radius:9px;cursor:pointer;text-decoration:none}
+  .btn:hover{border-color:var(--green)}
+  .btn svg{width:14px;height:14px}
+
+  .notice{font-size:12.5px}
+  .notice .wrap{padding:9px 22px;display:flex;gap:9px;align-items:center}
+  .notice.demo{background:var(--amber-soft);border-bottom:1px solid rgba(201,137,47,.25);color:#7a531a}
+  .notice.live{background:var(--green-soft);border-bottom:1px solid rgba(60,168,120,.25);color:#1f6b48}
+  .notice.err{background:var(--red-soft);border-bottom:1px solid rgba(192,83,63,.25);color:#8a3322}
+  .notice a{text-decoration:underline;cursor:pointer;font-weight:600}
+
+  .hero{background:linear-gradient(180deg,var(--ink) 0%,var(--ink) 62%,transparent 62%);padding-bottom:6px}
+  .hero h2{color:var(--paper);font-size:clamp(23px,3.3vw,36px);max-width:760px;margin:16px 0 4px;line-height:1.08}
+  .hero p.lede{color:var(--muted-on-ink);max-width:620px;margin:0 0 26px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .stat{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:16px 17px;box-shadow:var(--shadow)}
+  .stat .label{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .stat .value{font-family:'Archivo';font-weight:800;font-size:25px;margin-top:6px;line-height:1}
+  .stat .trend{font-size:12px;margin-top:7px;color:var(--green);font-weight:600}
+
+  .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:30px 0 18px}
+  .search{flex:1;min-width:230px;display:flex;align-items:center;gap:10px;background:var(--paper-2);
+    border:1px solid var(--line);border-radius:11px;padding:11px 14px;box-shadow:var(--shadow)}
+  .search input{border:0;outline:0;background:transparent;font:inherit;width:100%;color:var(--ink)}
+  .search svg{width:18px;height:18px;color:var(--muted);flex:none}
+  select.filter{font:inherit;background:var(--paper-2);border:1px solid var(--line);border-radius:11px;
+    padding:11px 14px;color:var(--ink);box-shadow:var(--shadow);cursor:pointer}
+  .count{font-size:13px;color:var(--muted);margin-left:auto}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;padding-bottom:50px;min-height:120px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+    box-shadow:var(--shadow);cursor:pointer;transition:transform .16s ease,box-shadow .16s ease;display:flex;flex-direction:column}
+  .card:hover{transform:translateY(-3px);box-shadow:0 4px 10px rgba(10,24,28,.10),0 18px 40px rgba(10,24,28,.14)}
+  .card:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+  .card-head{display:flex;gap:13px;padding:16px 16px 13px}
+  .avatar{width:60px;height:60px;border-radius:12px;flex:none;object-fit:cover;background:var(--ink-2);
+    display:grid;place-items:center;color:var(--paper);font-family:'Archivo';font-weight:800;font-size:20px}
+  .card-head .nm{font-family:'Archivo';font-weight:700;font-size:16.5px;line-height:1.15}
+  .pill{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;
+    background:var(--green-soft);color:#1f6b48;margin-top:6px;letter-spacing:.02em}
+  .card-body{padding:0 16px 16px;margin-top:auto}
+  .minirow{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-top:1px dashed var(--line)}
+  .minirow .k{font-size:12px;color:var(--muted)}
+  .minirow .v{font-weight:600}
+  .bartrack{height:6px;border-radius:6px;background:var(--green-soft);overflow:hidden;margin-top:10px}
+  .barfill{height:100%;background:var(--green);border-radius:6px}
+  .card-foot{font-size:11.5px;color:var(--muted);padding:11px 16px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center}
+  .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:50px 20px}
+  .spinner{width:30px;height:30px;border:3px solid var(--green-soft);border-top-color:var(--green);
+    border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .overlay{position:fixed;inset:0;background:rgba(10,24,28,.55);backdrop-filter:blur(3px);
+    display:none;align-items:flex-start;justify-content:center;padding:34px 18px;z-index:50;overflow:auto}
+  .overlay.open{display:flex}
+  .sheet{background:var(--paper);width:min(860px,100%);border-radius:18px;overflow:hidden;
+    box-shadow:0 30px 80px rgba(10,24,28,.4);animation:rise .22s ease}
+  @keyframes rise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+  .sheet-head{background:var(--ink);color:var(--paper);padding:22px 24px;display:flex;gap:18px;align-items:flex-start}
+  .sheet-head .avatar{width:74px;height:74px;font-size:24px}
+  .sheet-head h2{font-size:23px;margin:0}
+  .sheet-head .meta{color:var(--muted-on-ink);font-size:13px;margin-top:5px}
+  .closex{margin-left:auto;background:var(--ink-2);border:1px solid var(--line-on-ink);color:var(--paper);
+    width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:18px;flex:none}
+  .contacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .contacts a{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;
+    background:var(--ink-2);border:1px solid var(--line-on-ink);color:var(--paper);padding:7px 11px;border-radius:9px;text-decoration:none}
+  .contacts a:hover{border-color:var(--green)}
+  .contacts svg{width:14px;height:14px}
+
+  .tabs{display:flex;gap:4px;padding:0 24px;border-bottom:1px solid var(--line);background:var(--paper-2);flex-wrap:wrap}
+  .tab{font-weight:600;font-size:13.5px;border:0;background:transparent;color:var(--muted);
+    padding:14px 14px;cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px}
+  .tab.active{color:var(--ink);border-color:var(--green)}
+  .panel{padding:22px 24px 26px;display:none}
+  .panel.active{display:block}
+  .src{font-size:11px;color:var(--muted);display:inline-flex;gap:7px;align-items:center;background:var(--paper-2);
+    border:1px solid var(--line);padding:5px 10px;border-radius:999px;margin-bottom:14px}
+  .src b{color:var(--ink);font-weight:600}
+  .nodata{color:var(--muted);font-size:13.5px;background:var(--paper-2);border:1px dashed var(--line);
+    border-radius:12px;padding:18px;text-align:center}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+    font-weight:600;padding:9px 10px;border-bottom:1px solid var(--line)}
+  td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  td.num,th.num{text-align:right;font-family:'IBM Plex Mono';font-variant-numeric:tabular-nums}
+  .tag{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .tag.pago{background:var(--green-soft);color:#1f6b48}
+  .tag.liquidado{background:rgba(60,90,168,.12);color:#2f4d8a}
+  .tag.empenhado{background:var(--amber-soft);color:#7a531a}
+  .tag.indicado{background:var(--line);color:var(--muted)}
+  .tag.muni{background:rgba(60,90,168,.12);color:#2f4d8a}
+  .tag.estad{background:rgba(60,168,120,.12);color:#1f6b48}
+  .tag.fed{background:rgba(120,60,168,.12);color:#5a2f8a}
+  .tag.osc{background:rgba(201,137,47,.14);color:#7a531a}
+  .bk{background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:15px 16px;margin-bottom:18px}
+  .bk .t{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .bk .big{font-family:'Archivo';font-weight:800;font-size:22px;margin:5px 0 12px}
+  .seg{display:flex;height:9px;border-radius:6px;overflow:hidden;margin-bottom:10px}
+  .legend{display:flex;flex-direction:column;gap:6px}
+  .legend .li{display:flex;align-items:center;gap:8px;font-size:12.5px}
+  .legend .sw{width:10px;height:10px;border-radius:3px;flex:none}
+  .legend .amt{margin-left:auto;font-family:'IBM Plex Mono';font-weight:600;font-size:12px}
+  .proj{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:11px;background:var(--paper-2)}
+  .proj .ph{display:flex;gap:10px;align-items:center;margin-bottom:5px}
+  .proj .pid{font-family:'IBM Plex Mono';font-size:11.5px;color:var(--muted)}
+  .proj .pt{font-weight:600;font-size:14.5px;font-family:'Archivo'}
+  .proj .pd{font-size:13px;color:var(--muted)}
+  .status-b{font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--green-soft);color:#1f6b48}
+
+  /* modal de ajuda */
+  .help .sheet{max-width:620px}
+  .help-body{padding:24px}
+  .help-body h3{margin:18px 0 6px;font-size:15px}
+  .help-body p{margin:0 0 8px;font-size:13.5px;color:var(--ink)}
+  .help-body code{background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12px}
+  .step{display:flex;gap:12px;margin-bottom:14px}
+  .step .n{width:24px;height:24px;border-radius:50%;background:var(--green);color:#06231a;font-weight:800;
+    display:grid;place-items:center;flex:none;font-size:13px;font-family:'Archivo'}
+
+  footer{background:var(--ink);color:var(--muted-on-ink);font-size:12.5px;padding:30px 0 40px;margin-top:10px}
+  footer .wrap{display:grid;gap:14px}
+  footer h4{color:var(--paper);font-size:13px;margin:0 0 8px;text-transform:uppercase;letter-spacing:.05em}
+  .sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:0;margin:0}
+  .sources li{list-style:none;padding:9px 0;border-top:1px solid var(--line-on-ink)}
+  .sources .freq{color:var(--green);font-weight:600}
+
+  @media(max-width:720px){
+    .stats{grid-template-columns:1fr 1fr}
+    .hero{background:linear-gradient(180deg,var(--ink) 0%,var(--ink) 80%,transparent 80%)}
+    .status{order:3;margin-left:0;width:100%;justify-content:center}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="brand">
+      <span class="seal" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0a181c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg>
+      </span>
+      <div><h1>Painel da Transparência</h1><div class="sub">Deputados Estaduais · Goiás</div></div>
+    </div>
+    <div class="status" id="status"><span class="dot" id="statusDot"></span><span id="statusTxt">Carregando…</span></div>
+    <div class="top-actions">
+      <button class="btn" id="btnRefresh" title="Buscar dados ao vivo novamente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6"/></svg>Atualizar</button>
+      <button class="btn" id="btnImport" title="Importar CSV ou JSON baixado do portal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M3 21h18"/></svg>Importar</button>
+      <input type="file" id="fileInput" accept=".csv,.json,.txt" hidden>
+      <button class="btn" id="btnHelp" aria-label="Ajuda">?</button>
+    </div>
+  </div>
+</header>
+
+<div class="notice demo" id="notice" style="display:none"><div class="wrap" id="noticeTxt"></div></div>
+
+<section class="hero">
+  <div class="wrap">
+    <h2>Para onde vai o dinheiro do mandato — aberto, rastreável e atualizado.</h2>
+    <p class="lede">Despesas de gabinete, verba indenizatória, diárias e emendas parlamentares de cada deputado estadual de Goiás.</p>
+    <div class="stats">
+      <div class="stat"><div class="label">Deputados</div><div class="value" id="s-dep">—</div><div class="trend">legislatura 2023–2027</div></div>
+      <div class="stat"><div class="label">Despesas no exercício</div><div class="value" id="s-desp">—</div><div class="trend">verba · diárias · gabinete</div></div>
+      <div class="stat"><div class="label">Emendas</div><div class="value" id="s-emend">—</div><div class="trend">municípios · estado · OSCs</div></div>
+      <div class="stat"><div class="label">% emendas pagas</div><div class="value" id="s-pago">—</div><div class="trend">empenhado → pago</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="controls">
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" type="search" placeholder="Buscar por nome do deputado…" aria-label="Buscar">
+    </label>
+    <select id="party" class="filter" aria-label="Filtrar por partido"><option value="">Todos os partidos</option></select>
+    <select id="sort" class="filter" aria-label="Ordenar"><option value="nome">Ordem alfabética</option><option value="desp">Maior despesa</option><option value="emend">Maior emenda</option></select>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="grid" id="grid"><div class="empty"><div class="spinner"></div>Conectando à base de dados abertos de Goiás…</div></div>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true"><div class="sheet" id="sheet"></div></div>
+
+<div class="overlay help" id="helpOverlay" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <div class="sheet-head"><h2>Como o portal funciona</h2><button class="closex" onclick="closeHelp()">×</button></div>
+    <div class="help-body">
+      <p>O portal se atualiza sozinho — ele lê os dados abertos do Governo de Goiás direto no seu navegador. Você não precisa instalar nada.</p>
+      <div class="step"><span class="n">1</span><div><b>Abra o arquivo.</b> Ao abrir, ele tenta conectar à API de dados abertos e baixar as emendas mais recentes. O selo no topo mostra o estado: <b>ao vivo</b>, <b>demonstração</b> ou <b>erro</b>.</div></div>
+      <div class="step"><span class="n">2</span><div><b>Se conectar (ao vivo):</b> as emendas reais aparecem automaticamente. Clique em <b>Atualizar</b> quando quiser puxar de novo.</div></div>
+      <div class="step"><span class="n">3</span><div><b>Se não conectar:</b> alguns portais bloqueiam acesso direto pelo navegador. Nesse caso, baixe o arquivo <code>.csv</code> em transparencia.go.gov.br ou no EmendasGO e use o botão <b>Importar</b> — o portal entende as colunas sozinho.</div></div>
+      <h3>Despesas e perfil</h3>
+      <p>A API de dados abertos só traz as <b>emendas</b>. As despesas (verba indenizatória, diárias, folha de gabinete) e o perfil de cada deputado saem da Transparência da ALEGO em CSV — basta importar pelo mesmo botão. Até lá, esses campos aparecem como “sem dados”.</p>
+      <h3>Publicar na internet</h3>
+      <p>É um arquivo único. Para deixar no ar, suba em qualquer hospedagem estática gratuita (GitHub Pages, Netlify, Cloudflare Pages) — é só arrastar o arquivo.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div><h4>Fontes de dados e cadência</h4><ul class="sources" id="sourceList"></ul></div>
+    <div style="border-top:1px solid var(--line-on-ink);padding-top:14px">
+      Dados públicos sob a Lei de Acesso à Informação (Lei nº 12.527/2011). Cada bloco indica a fonte e a data do dado. Portal sem vínculo oficial com a ALEGO ou o Governo de Goiás.
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============================ utilidades ============================ */
+const BRL  = v => (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+const BRLc = v => (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const norm = s => { s=(''+s).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); return s.replace(/[^a-z0-9]/g,''); };
+const initials = n => n.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const TIPO = {
+  municipal:{cls:'muni',cor:'#2f4d8a',rotulo:'Município'},
+  estadual:{cls:'estad',cor:'#3ca878',rotulo:'Órgão estadual'},
+  federal:{cls:'fed',cor:'#7a3ca8',rotulo:'Órgão federal'},
+  osc:{cls:'osc',cor:'#c9892f',rotulo:'Org. da sociedade civil'},
+};
+const FONTES = [
+  {nome:'Dados Abertos GO — emendas (CKAN, ao vivo)', freq:'Diária', org:'dadosabertos.go.gov.br'},
+  {nome:'Transparência ALEGO — despesas (importar CSV)', freq:'Semanal', org:'transparencia.al.go.leg.br'},
+  {nome:'EmendasGO / Sislog — indicações (importar CSV)', freq:'Quinzenal', org:'sislog.go.gov.br'},
+  {nome:'Portal ALEGO — perfil e proposições', freq:'Mensal', org:'portal.al.go.leg.br'},
+];
+document.getElementById('sourceList').innerHTML = FONTES.map(f=>
+  `<li><div>${f.nome}</div><div style="margin-top:3px"><span class="freq">${f.freq}</span> · ${f.org}</div></li>`).join('');
+
+/* =================== classificação e normalização =================== */
+function classificarTipo(beneficiario, tipoBruto){
+  const b = norm(`${beneficiario} ${tipoBruto||''}`);
+  if(/(municipio|prefeitura|camaramunicipal)/.test(b)) return 'municipal';
+  if(/(federal|uniao|\bifg\b|\bufg\b|ifgoiano)/.test(b)) return 'federal';
+  if(/(associacao|instituto|fundacao|\bosc\b|\blar\b|apae|entidade|ong)/.test(b)) return 'osc';
+  return 'estadual';
+}
+const toNum = x => {
+  if(x==null||x==='') return 0;
+  let s = (''+x).replace(/r\$/i,'').replace(/\s/g,'');
+  if(s.includes(',')) s = s.replace(/\./g,'').replace(',', '.');   // 1.234,56 -> 1234.56
+  const n = parseFloat(s.replace(/[^0-9.\-]/g,'')); return isNaN(n)?0:n;
+};
+// candidatos de coluna (auto-mapeamento)
+const CAND = {
+  ano:['ano','exercicio','anoemenda'],
+  autor:['autor','parlamentar','deputado','nomeautor','nomeparlamentar','nome'],
+  partido:['partido','siglapartido'],
+  beneficiario:['beneficiario','favorecido','municipio','orgao','entidade','destinatario'],
+  tipo:['tipo','tipobeneficiario','natureza','esfera'],
+  objeto:['objeto','finalidade','descricao','funcao','acao'],
+  valor:['valor','valoremenda','valorindicado','valortotal'],
+  empenhado:['valorempenhado','empenhado'],
+  liquidado:['valorliquidado','liquidado'],
+  pago:['valorpago','pago'],
+};
+function mapear(cols){
+  const idx = {}; cols.forEach(c=>idx[norm(c)]=c);
+  const m = {};
+  for(const k in CAND) for(const cand of CAND[k]) if(idx[norm(cand)]){ m[k]=idx[norm(cand)]; break; }
+  return m;
+}
+/* recebe registros crus + nomes de colunas -> deputados no formato do app */
+function ingerir(records, cols){
+  const m = mapear(cols);
+  if(!m.autor || !m.beneficiario || (!m.valor && !m.empenhado))
+    throw new Error('Não reconheci as colunas (autor/beneficiário/valor). Confira o arquivo.');
+  const byAutor = {};
+  for(const r of records){
+    const autor = (r[m.autor]||'Não informado').toString().trim();
+    const benef = (r[m.beneficiario]||'—').toString().trim();
+    const valor = toNum(r[m.valor]) || toNum(r[m.empenhado]);
+    const pago = toNum(r[m.pago]), liq = toNum(r[m.liquidado]), emp = toNum(r[m.empenhado]);
+    const status = pago>0?'pago':(liq>0?'liquidado':(emp>0?'empenhado':'indicado'));
+    const d = byAutor[autor] || (byAutor[autor] = {
+      nome:autor, partido:(m.partido?r[m.partido]:'')||'—',
+      despesas:[], emendas:[], projetos:[], contatos:{}
+    });
+    d.emendas.push({ ano:m.ano?r[m.ano]:'', beneficiario:benef,
+      tipo:classificarTipo(benef, m.tipo?r[m.tipo]:''), objeto:(m.objeto?r[m.objeto]:'')||'',
+      valor, status });
+  }
+  return Object.values(byAutor).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+}
+
+/* ======================= conexão ao vivo (CKAN) ======================= */
+const CKAN = 'https://dadosabertos.go.gov.br/api/3/action';
+async function ckan(action, params){
+  const u = new URL(`${CKAN}/${action}`);
+  Object.entries(params||{}).forEach(([k,v])=>u.searchParams.set(k,v));
+  const r = await fetch(u, {headers:{'Accept':'application/json'}});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const j = await r.json();
+  if(!j.success) throw new Error('CKAN success=false');
+  return j.result;
+}
+async function buscarAoVivo(){
+  const pkg = await ckan('package_show', {id:'emendas-parlamentares'});
+  const res = (pkg.resources||[]);
+  const ds = res.find(x=>x.datastore_active);
+  if(ds){
+    let recs=[], offset=0, total=Infinity;
+    while(offset<total){
+      const out = await ckan('datastore_search', {resource_id:ds.id, limit:1000, offset});
+      recs = recs.concat(out.records||[]);
+      total = out.total||recs.length; offset += 1000;
+      if(!out.records || !out.records.length) break;
+    }
+    const cols = recs.length ? Object.keys(recs[0]).filter(c=>c!=='_id') : [];
+    return ingerir(recs, cols);
+  }
+  // sem datastore: tenta o primeiro CSV
+  const csv = res.find(x=>/csv/i.test(x.format||'') && x.url);
+  if(csv){ const txt = await (await fetch(csv.url)).text(); const {rows,cols}=parseCSV(txt); return ingerir(rows, cols); }
+  throw new Error('Dataset sem recurso de dados acessível.');
+}
+
+/* ============================ CSV parser ============================ */
+function parseCSV(text){
+  text = text.replace(/^\uFEFF/,'');
+  const delim = (text.split('\n')[0].match(/;/g)||[]).length >= (text.split('\n')[0].match(/,/g)||[]).length ? ';' : ',';
+  const rows=[]; let row=[], cell='', q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){cell+='"';i++;} else q=false; } else cell+=c; }
+    else { if(c==='"') q=true; else if(c===delim){row.push(cell);cell='';}
+      else if(c==='\n'){row.push(cell);rows.push(row);row=[];cell='';}
+      else if(c!=='\r') cell+=c; }
+  }
+  if(cell!==''||row.length){ row.push(cell); rows.push(row); }
+  const cols = rows.shift().map(c=>c.trim());
+  const objs = rows.filter(r=>r.some(x=>x!=='')).map(r=>{const o={};cols.forEach((c,i)=>o[c]=(r[i]||'').trim());return o;});
+  return {rows:objs, cols};
+}
+
+/* ======================= dados de demonstração ======================= */
+const DEMO = [
+  {nome:'Ana Rabelo (exemplo)',partido:'PV',contatos:{email:'gabinete@exemplo.go',whatsapp:'(62) 0000-0000',instagram:'@exemplo'},
+   despesas:[{cat:'Verba indenizatória — locação',valor:108000,ref:'jan–mai/2026'},{cat:'Diárias',valor:21800,ref:'jan–mai/2026'},{cat:'Folha do gabinete',valor:392000,ref:'jan–mai/2026'}],
+   emendas:[{ano:2026,beneficiario:'Município de Pirenópolis',tipo:'municipal',objeto:'Custeio em saúde',valor:600000,status:'pago'},{ano:2026,beneficiario:'Secretaria de Saúde',tipo:'estadual',objeto:'Equipamentos hospitalares',valor:450000,status:'empenhado'},{ano:2026,beneficiario:'APAE',tipo:'osc',objeto:'Apoio assistencial',valor:150000,status:'pago'}],
+   projetos:[{id:'PL 1.204/2026',titulo:'Hortas comunitárias',desc:'Incentivos à agricultura urbana.',status:'Em tramitação'}]},
+  {nome:'Bruno Tavares (exemplo)',partido:'UNIÃO',contatos:{email:'gabinete@exemplo.go',whatsapp:'(62) 0000-0000',instagram:'@exemplo'},
+   despesas:[{cat:'Verba indenizatória — combustível',valor:39200,ref:'jan–mai/2026'},{cat:'Folha do gabinete',valor:415000,ref:'jan–mai/2026'}],
+   emendas:[{ano:2026,beneficiario:'Município de Rio Verde',tipo:'municipal',objeto:'Pavimentação',valor:900000,status:'empenhado'},{ano:2026,beneficiario:'Município de Jataí',tipo:'municipal',objeto:'Patrulha mecanizada',valor:700000,status:'liquidado'}],
+   projetos:[{id:'PL 0.341/2026',titulo:'Cooperativismo agropecuário',desc:'Apoio a cooperativas.',status:'Em tramitação'}]},
+  {nome:'Carla Menezes (exemplo)',partido:'PT',contatos:{email:'gabinete@exemplo.go',whatsapp:'(62) 0000-0000',instagram:'@exemplo'},
+   despesas:[{cat:'Verba indenizatória — divulgação',valor:52000,ref:'jan–mai/2026'},{cat:'Folha do gabinete',valor:368500,ref:'jan–mai/2026'}],
+   emendas:[{ano:2026,beneficiario:'Universidade Estadual de Goiás',tipo:'estadual',objeto:'Bolsas de extensão',valor:320000,status:'pago'},{ano:2026,beneficiario:'Município de Aparecida',tipo:'municipal',objeto:'Reforma de creche',valor:400000,status:'empenhado'},{ano:2026,beneficiario:'Instituto Cerrado Vivo',tipo:'osc',objeto:'Cultura em escolas',valor:120000,status:'liquidado'}],
+   projetos:[{id:'PL 1.510/2026',titulo:'Primeira infância',desc:'Diretrizes integradas 0–6 anos.',status:'Em tramitação'}]},
+  {nome:'Diego Lustosa (exemplo)',partido:'MDB',contatos:{email:'gabinete@exemplo.go',whatsapp:'(62) 0000-0000',instagram:'@exemplo'},
+   despesas:[{cat:'Verba indenizatória — locação',valor:96000,ref:'jan–mai/2026'},{cat:'Folha do gabinete',valor:401200,ref:'jan–mai/2026'}],
+   emendas:[{ano:2026,beneficiario:'Município de Anápolis',tipo:'municipal',objeto:'Custeio em educação',valor:550000,status:'pago'},{ano:2026,beneficiario:'Corpo de Bombeiros',tipo:'estadual',objeto:'Viaturas de resgate',valor:600000,status:'empenhado'}],
+   projetos:[{id:'PL 0.207/2026',titulo:'Regularização fundiária',desc:'Apoio à titulação de imóveis.',status:'Em tramitação'}]},
+  {nome:'Eliane Pordeus (exemplo)',partido:'PP',contatos:{email:'gabinete@exemplo.go',whatsapp:'(62) 0000-0000',instagram:'@exemplo'},
+   despesas:[{cat:'Verba indenizatória — consultoria',valor:60000,ref:'jan–mai/2026'},{cat:'Folha do gabinete',valor:357800,ref:'jan–mai/2026'}],
+   emendas:[{ano:2026,beneficiario:'Município de Catalão',tipo:'municipal',objeto:'Equipamentos de UBS',valor:480000,status:'liquidado'},{ano:2026,beneficiario:'Fundo de Assistência Social',tipo:'estadual',objeto:'Transferência de renda',valor:350000,status:'pago'},{ano:2026,beneficiario:'Lar São Vicente',tipo:'osc',objeto:'Acolhimento de idosos',valor:140000,status:'pago'}],
+   projetos:[{id:'PL 1.033/2026',titulo:'Mulher empreendedora',desc:'Microcrédito e capacitação.',status:'Em tramitação'}]},
+  {nome:'Fábio Quirino (exemplo)',partido:'PSDB',contatos:{email:'gabinete@exemplo.go',whatsapp:'(62) 0000-0000',instagram:'@exemplo'},
+   despesas:[{cat:'Verba indenizatória — combustível',valor:44300,ref:'jan–mai/2026'},{cat:'Folha do gabinete',valor:388900,ref:'jan–mai/2026'}],
+   emendas:[{ano:2026,beneficiario:'Município de Luziânia',tipo:'municipal',objeto:'Iluminação pública',valor:520000,status:'empenhado'},{ano:2026,beneficiario:'Agência de Infraestrutura',tipo:'estadual',objeto:'Rodovia vicinal',valor:800000,status:'empenhado'}],
+   projetos:[{id:'PL 0.612/2026',titulo:'Banda larga rural',desc:'Conectividade no campo.',status:'Aprovado'}]},
+];
+
+/* ============================ estado e render ============================ */
+let DADOS = [], FONTE_LABEL = '', SOMENTE_EMENDAS = false;
+const somaDesp = d => d.despesas.reduce((a,x)=>a+x.valor,0);
+const somaEmend = d => d.emendas.reduce((a,x)=>a+x.valor,0);
+const emendPaga = d => d.emendas.filter(e=>e.status==='pago').reduce((a,x)=>a+x.valor,0);
+
+function setStatus(tipo, txt, noticeHTML){
+  const dot=document.getElementById('statusDot');
+  dot.className='dot'+(tipo==='live'?' live':tipo==='err'?' err':' demo');
+  document.getElementById('statusTxt').textContent = txt;
+  const n=document.getElementById('notice');
+  if(noticeHTML){ n.style.display='block'; n.className='notice '+(tipo==='live'?'live':tipo==='err'?'err':'demo');
+    document.getElementById('noticeTxt').innerHTML = noticeHTML; }
+  else n.style.display='none';
+}
+function setDados(lista, label, somenteEmendas){
+  DADOS=lista; FONTE_LABEL=label; SOMENTE_EMENDAS=!!somenteEmendas;
+  // filtro de partido
+  const sel=document.getElementById('party');
+  sel.innerHTML='<option value="">Todos os partidos</option>';
+  [...new Set(lista.map(d=>d.partido).filter(p=>p&&p!=='—'))].sort()
+    .forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);});
+  fillStats(); render();
+}
+function fillStats(){
+  const td=DADOS.reduce((a,d)=>a+somaDesp(d),0), te=DADOS.reduce((a,d)=>a+somaEmend(d),0), tp=DADOS.reduce((a,d)=>a+emendPaga(d),0);
+  document.getElementById('s-dep').textContent=DADOS.length;
+  document.getElementById('s-desp').textContent= td>0?BRL(td):'—';
+  document.getElementById('s-emend').textContent= te>0?BRL(te):'—';
+  document.getElementById('s-pago').textContent= te>0?Math.round(tp/te*100)+'%':'—';
+}
+const grid=document.getElementById('grid'), countEl=document.getElementById('count');
+function render(){
+  const q=norm(document.getElementById('q').value), pf=document.getElementById('party').value, sort=document.getElementById('sort').value;
+  let list=DADOS.filter(d=>(!q||norm(d.nome).includes(q))&&(!pf||d.partido===pf));
+  list.sort((a,b)=> sort==='desp'?somaDesp(b)-somaDesp(a) : sort==='emend'?somaEmend(b)-somaEmend(a) : a.nome.localeCompare(b.nome,'pt-BR'));
+  countEl.textContent = `${list.length} de ${DADOS.length} deputados`;
+  if(!list.length){ grid.innerHTML='<div class="empty">Nenhum deputado encontrado.</div>'; return; }
+  const maxDesp = Math.max(1,...DADOS.map(d=> SOMENTE_EMENDAS?somaEmend(d):somaDesp(d)));
+  list.forEach((d,i)=>d._i=DADOS.indexOf(d));
+  grid.innerHTML = list.map(d=>{
+    const base = SOMENTE_EMENDAS?somaEmend(d):somaDesp(d);
+    return `<article class="card" tabindex="0" role="button" data-i="${d._i}" aria-label="Abrir ficha de ${d.nome}">
+      <div class="card-head"><div class="avatar">${initials(d.nome)}</div>
+        <div><div class="nm">${d.nome}</div><span class="pill">${d.partido}</span></div></div>
+      <div class="card-body">
+        <div class="minirow"><span class="k">Despesas no exercício</span><span class="v mono">${somaDesp(d)>0?BRL(somaDesp(d)):'—'}</span></div>
+        <div class="minirow"><span class="k">Emendas</span><span class="v mono">${somaEmend(d)>0?BRL(somaEmend(d)):'—'}</span></div>
+        <div class="bartrack"><div class="barfill" style="width:${Math.round(base/maxDesp*100)}%"></div></div>
+      </div>
+      <div class="card-foot"><span>${d.emendas.length} emendas · ${d.projetos.length} projetos</span><span>Ver ficha →</span></div>
+    </article>`;}).join('');
+  grid.querySelectorAll('.card').forEach(c=>{
+    c.onclick=()=>openSheet(+c.dataset.i);
+    c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openSheet(+c.dataset.i);}};
+  });
+}
+['q','party','sort'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+
+/* ============================ ficha ============================ */
+const overlay=document.getElementById('overlay'), sheet=document.getElementById('sheet');
+function segBar(emendas){
+  const por={}; emendas.forEach(e=>por[e.tipo]=(por[e.tipo]||0)+e.valor);
+  const seg=Object.entries(por).map(([t,v])=>`<div style="flex:${v};background:${TIPO[t].cor}"></div>`).join('');
+  const leg=Object.entries(por).map(([t,v])=>`<div class="li"><span class="sw" style="background:${TIPO[t].cor}"></span>${TIPO[t].rotulo}<span class="amt">${BRL(v)}</span></div>`).join('');
+  return {seg,leg};
+}
+function openSheet(i){
+  const d=DADOS[i]; if(!d) return;
+  const desp=somaDesp(d), temDesp=d.despesas.length>0, temProj=d.projetos.length>0;
+  const c=d.contatos||{}, {seg,leg}=segBar(d.emendas);
+  const contatosHTML = (c.email||c.whatsapp||c.instagram) ? `<div class="contacts">
+      ${c.email?`<a href="mailto:${c.email}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>${c.email}</a>`:''}
+      ${c.whatsapp?`<a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.4 2 .9 3 .6 2.6L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.6A2 2 0 0 1 22 16.9Z"/></svg>${c.whatsapp}</a>`:''}
+      ${c.instagram?`<a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>${c.instagram}</a>`:''}
+    </div>` : '';
+  sheet.innerHTML=`
+    <div class="sheet-head"><div class="avatar">${initials(d.nome)}</div>
+      <div><h2>${d.nome}</h2><div class="meta">${d.partido} · Goiás · Legislatura 2023–2027</div>${contatosHTML}</div>
+      <button class="closex" aria-label="Fechar" onclick="closeSheet()">×</button></div>
+    <div class="tabs">
+      <button class="tab active" data-p="emend">Emendas</button>
+      <button class="tab" data-p="desp">Despesas</button>
+      <button class="tab" data-p="proj">Projetos</button>
+    </div>
+    <div class="panel active" data-p="emend">
+      <span class="src">Fonte: <b>${FONTE_LABEL}</b></span>
+      ${d.emendas.length?`
+      <div class="bk"><div class="t">Emendas por tipo de beneficiário</div>
+        <div class="big">${BRLc(somaEmend(d))}</div><div class="seg">${seg}</div><div class="legend">${leg}</div></div>
+      <table><thead><tr><th>Beneficiário</th><th>Objeto</th><th>Tipo</th><th>Fase</th><th class="num">Valor</th></tr></thead><tbody>
+        ${d.emendas.map(e=>`<tr><td>${e.beneficiario}</td><td>${e.objeto||'—'}</td>
+          <td><span class="tag ${TIPO[e.tipo].cls}">${TIPO[e.tipo].rotulo}</span></td>
+          <td><span class="tag ${e.status}">${e.status}</span></td>
+          <td class="num">${BRLc(e.valor)}</td></tr>`).join('')}
+      </tbody></table>`:`<div class="nodata">Sem emendas registradas para este deputado nesta base.</div>`}
+    </div>
+    <div class="panel" data-p="desp">
+      <span class="src">Fonte: <b>Transparência ALEGO (SIOFINet)</b></span>
+      ${temDesp?`<table><thead><tr><th>Categoria</th><th>Referência</th><th class="num">Valor</th></tr></thead><tbody>
+        ${d.despesas.map(x=>`<tr><td>${x.cat}</td><td>${x.ref||'—'}</td><td class="num">${BRLc(x.valor)}</td></tr>`).join('')}
+        <tr><td colspan="2" style="font-weight:700">Total</td><td class="num" style="font-weight:700">${BRLc(desp)}</td></tr></tbody></table>`
+        :`<div class="nodata">Sem dados de despesas. Importe o CSV de verba indenizatória / diárias da Transparência da ALEGO pelo botão <b>Importar</b>.</div>`}
+    </div>
+    <div class="panel" data-p="proj">
+      <span class="src">Fonte: <b>Portal ALEGO — proposições</b></span>
+      ${temProj?d.projetos.map(p=>`<div class="proj"><div class="ph"><span class="pid">${p.id}</span><span class="status-b">${p.status}</span></div>
+        <div class="pt">${p.titulo}</div><div class="pd">${p.desc||''}</div></div>`).join('')
+        :`<div class="nodata">Sem projetos importados para este deputado.</div>`}
+    </div>`;
+  sheet.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+    sheet.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    sheet.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active'); sheet.querySelector(`.panel[data-p="${t.dataset.p}"]`).classList.add('active');
+  });
+  overlay.classList.add('open'); document.body.style.overflow='hidden';
+}
+function closeSheet(){overlay.classList.remove('open');document.body.style.overflow='';}
+overlay.onclick=e=>{if(e.target===overlay)closeSheet();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheet();closeHelp();}});
+
+/* ============================ ajuda ============================ */
+const helpOverlay=document.getElementById('helpOverlay');
+document.getElementById('btnHelp').onclick=()=>{helpOverlay.classList.add('open');document.body.style.overflow='hidden';};
+function closeHelp(){helpOverlay.classList.remove('open');document.body.style.overflow='';}
+helpOverlay.onclick=e=>{if(e.target===helpOverlay)closeHelp();};
+
+/* ============================ ações ============================ */
+async function carregarAoVivo(){
+  setStatus('demo','Conectando…','');
+  grid.innerHTML='<div class="empty"><div class="spinner"></div>Conectando à base de dados abertos de Goiás…</div>';
+  try{
+    const lista = await buscarAoVivo();
+    if(!lista.length) throw new Error('Base vazia.');
+    const ts = new Date().toLocaleString('pt-BR');
+    setDados(lista, `Dados Abertos GO (CKAN) · lido em ${ts}`, true);
+    setStatus('live', 'Ao vivo · '+lista.length+' autores',
+      `<span><b>Conectado.</b> Emendas carregadas direto dos Dados Abertos de Goiás em ${ts}. As despesas e o perfil entram pelo botão <a id="lnkImp">Importar</a>.</span>`);
+    const li=document.getElementById('lnkImp'); if(li) li.onclick=()=>document.getElementById('fileInput').click();
+  }catch(err){
+    setDados(DEMO, 'Dados de demonstração (fictícios)', false);
+    setStatus('demo','Demonstração',
+      `<span><b>Não foi possível conectar à API pelo navegador</b> (${err.message}). Mostrando demonstração. Baixe o CSV de emendas em <a href="https://transparencia.go.gov.br/emendas-parlamentares-de-goias/" target="_blank" rel="noopener">transparencia.go.gov.br</a> e use o botão <a id="lnkImp2">Importar</a> — ou clique em Atualizar para tentar de novo.</span>`);
+    const li=document.getElementById('lnkImp2'); if(li) li.onclick=()=>document.getElementById('fileInput').click();
+  }
+}
+document.getElementById('btnRefresh').onclick=carregarAoVivo;
+document.getElementById('btnImport').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('fileInput').onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{
+    const txt=await f.text();
+    let lista;
+    if(/\.json$/i.test(f.name)){
+      const j=JSON.parse(txt);
+      const arr = Array.isArray(j)?j:(j.deputados||j.records||[]);
+      // se já vier no formato do app, usa direto; senão, ingere como registros crus
+      if(arr.length && arr[0].emendas) lista=arr;
+      else lista=ingerir(arr, Object.keys(arr[0]||{}));
+    }else{
+      const {rows,cols}=parseCSV(txt); lista=ingerir(rows,cols);
+    }
+    setDados(lista, `Importado de ${f.name}`, !lista.some(d=>d.despesas.length));
+    setStatus('live','Importado · '+lista.length+' deputados',
+      `<span><b>Arquivo importado:</b> ${f.name} (${lista.length} deputados).</span>`);
+  }catch(err){ setStatus('err','Erro ao importar', `<span><b>Não consegui ler o arquivo:</b> ${err.message}. Verifique se há colunas de autor, beneficiário e valor.</span>`); }
+  e.target.value='';
+};
+
+/* ============================ início ============================ */
+carregarAoVivo();
+</script>
+</body>
+</html>
